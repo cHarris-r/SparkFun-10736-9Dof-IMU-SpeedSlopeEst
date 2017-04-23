@@ -103,9 +103,12 @@ void DCM_Filter( void )
   /* Apply prop and int gain to rotation
 	** Need to convert the Gyro values to radians
 	**    Note: Values read from sensor are fixed point */
-  Omega_Vector[0] = GYRO_SCALED_RAD( g_sensor_state.gyro[0] ) + g_dcm_state.Omega_I[0] + g_dcm_state.Omega_P[0];
-  Omega_Vector[1] = GYRO_SCALED_RAD( g_sensor_state.gyro[1] ) + g_dcm_state.Omega_I[1] + g_dcm_state.Omega_P[1];
-  Omega_Vector[2] = GYRO_SCALED_RAD( g_sensor_state.gyro[2] ) + g_dcm_state.Omega_I[2] + g_dcm_state.Omega_P[2];
+  //Omega_Vector[0] = GYRO_SCALED_RAD( g_sensor_state.gyro[0] ) + g_dcm_state.Omega_I[0] + g_dcm_state.Omega_P[0];
+  //Omega_Vector[1] = GYRO_SCALED_RAD( g_sensor_state.gyro[1] ) + g_dcm_state.Omega_I[1] + g_dcm_state.Omega_P[1];
+  //Omega_Vector[2] = GYRO_SCALED_RAD( g_sensor_state.gyro[2] ) + g_dcm_state.Omega_I[2] + g_dcm_state.Omega_P[2];
+  Omega_Vector[0] = GYRO_X_SCALED( g_sensor_state.gyro[0] ) + g_dcm_state.Omega_I[0] + g_dcm_state.Omega_P[0];
+  Omega_Vector[1] = GYRO_Y_SCALED( g_sensor_state.gyro[1] ) + g_dcm_state.Omega_I[1] + g_dcm_state.Omega_P[1];
+  Omega_Vector[2] = GYRO_Z_SCALED( g_sensor_state.gyro[2] ) + g_dcm_state.Omega_I[2] + g_dcm_state.Omega_P[2];
 
   /* Update the state matrix
   ** We are essentially applying a rotation */

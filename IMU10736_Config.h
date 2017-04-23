@@ -6,11 +6,12 @@
 ** These can be changed to suit the users needs
 ******************************************************************/
 
+#define DEBUG 1 
+#define CALIBRATE 1
 
 /* Communication Parameters
 *******************************************************************/
 /* Serial Port Configuration */
-#define DEBUG 1 
 #define LOG_PORT_BAUD 115200
 #define COMM_PORT_BAUD 9600
 
@@ -194,8 +195,8 @@
 
 /* Calibration Macros
 ******************************************************************/
-#define TO_RAD(x) (x * 0.01745329252)  // *pi/180
-#define TO_DEG(x) (x * 57.2957795131)  // *180/pi
+#define TO_RAD(x) (x * 0.01745329252)  // deg to rad: *pi/180
+#define TO_DEG(x) (x * 57.2957795131)  // rad to deg: *180/pi
 
 /* Accelerometer Calibration
 ******************************************************************/
@@ -237,10 +238,10 @@
 #define GYRO_AVERAGE_OFFSET_X ((float) 0.0)
 #define GYRO_AVERAGE_OFFSET_Y ((float) 0.0)
 #define GYRO_AVERAGE_OFFSET_Z ((float) 0.0)
-#define GYRO_X_SCALED(x) ( GYRO_SCALED_RAD(x - GYRO_AVERAGE_OFFSET_X) )
-#define GYRO_Y_SCALED(x) ( GYRO_SCALED_RAD(x - GYRO_AVERAGE_OFFSET_Y) )
-#define GYRO_Z_SCALED(x) ( GYRO_SCALED_RAD(x - GYRO_AVERAGE_OFFSET_Z) )
 #define GYRO_SCALED_RAD(x) (x * TO_RAD(GYRO_GAIN)) 
+#define GYRO_X_SCALED(x) ((x-GYRO_AVERAGE_OFFSET_X) * TO_RAD(GYRO_GAIN)) 
+#define GYRO_Y_SCALED(x) ((x-GYRO_AVERAGE_OFFSET_Y) * TO_RAD(GYRO_GAIN)) 
+#define GYRO_Z_SCALED(x) ((x-GYRO_AVERAGE_OFFSET_Z) * TO_RAD(GYRO_GAIN))
 
 
 

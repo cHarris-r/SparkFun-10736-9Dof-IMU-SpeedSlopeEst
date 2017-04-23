@@ -48,7 +48,8 @@ void Blink_LED( void )
   if ( millis() > (g_control_state.g_LastBlinkTime + UART_BLINK_RATE) )
   {
 		/* Log the current states to the debug port */
-    Debug_LogOut();
+		if( CALIBRATE ){ Cal_LogOut(); }
+		else { Debug_LogOut(); }
 		
 		/* Display number of bytes available on comm port
 		** Com port is used for real-time communication with

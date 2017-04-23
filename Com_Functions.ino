@@ -30,14 +30,53 @@ void Debug_LogOut(void)
   imuLog += "Pitch:" + String( TO_DEG( g_sensor_state.pitch ),5 ) + ", ";
 	//imuLog += "Yaw:" + String( TO_DEG( g_sensor_state.yaw ),5 ) + ", ";
   
-  //imuLog += "accel:" + String( g_sensor_state.accel[0],5 ) + ", " + String( g_sensor_state.accel[1],5 ) + ", " + String( g_sensor_state.accel[2],5 ) + ", ";
-  //imuLog += "gyro:" + String( g_sensor_state.gyro[0],5 ) + ", " + String( g_sensor_state.gyro[1],5 ) + ", " + String( g_sensor_state.gyro[2],5 ) + ", ";
+  imuLog += "accel:" + String( g_sensor_state.accel[0],5 ) + ", " + String( g_sensor_state.accel[1],5 ) + ", " + String( g_sensor_state.accel[2],5 ) + ", ";
+  imuLog += "gyro:" + String( g_sensor_state.gyro[0],5 ) + ", " + String( g_sensor_state.gyro[1],5 ) + ", " + String( g_sensor_state.gyro[2],5 ) + ", ";
  
+	//g_swe_state.accel
+	//imuLog += "swe_accel:" + String( g_swe_state.accel[0],5 ) + ", " + String(g_swe_state.accel[1],5 ) + ", ";
+	//imuLog += "swe_vel:" + String( g_swe_state.vel[0],5 ) + ", " + String(g_swe_state.vel[1],5 ) + ", ";
+	
 	imuLog += "\r\n"; // Add a new line
 	LOG_PORT.print( imuLog ); // Print log line to serial port
 }
 
+/*************************************************
+** Cal_LogOut
+** This function just prints a standard string 
+** to the log_port serial port.
+** It is designed to assist in the calibration
+** of the sensor
+*/
+void Cal_LogOut(void)
+{
+	/* Output Euler angles as strings to LOG_PORT */
+  
+	String imuLog = ""; // Create a fresh line to log
+	
+  imuLog += "Time: " + String( g_control_state.timestamp ) + ", "; // Add time to log string
+  imuLog += "DT: " + String( g_control_state.G_Dt,5 ) + ", ";
+	imuLog += "SR: " + String( (1/g_control_state.G_Dt) ) + ", "; // Add delta time to log string
 
+  switch ( g_calibration.output_mode )
+  {
+    case 1:
+    	imuLog += "accel (min/ave/max): ";
+			imuLog += String(g_calibration.accel_min[0],5) + "/" + String(g_calibration.accel_total[0]/g_calibration.N,5) + "/" + String(g_calibration.accel_max[0],5) + ", ";
+			imuLog += String(g_calibration.accel_min[1],5) + "/" + String(g_calibration.accel_total[1]/g_calibration.N,5) + "/" + String(g_calibration.accel_max[1],5) + ", ";
+			imuLog += String(g_calibration.accel_min[2],5) + "/" + String(g_calibration.accel_total[2]/g_calibration.N,5) + "/" + String(g_calibration.accel_max[2],5) + ", ";
+      break; 
+    case 2:
+      imuLog += "gyro (current/ave): ";
+			imuLog += String(g_calibration.gyro_total[0]/g_calibration.N,5)  + "/" + String( g_sensor_state.gyro[0],5 ) + ", ";
+			imuLog += String(g_calibration.gyro_total[1]/g_calibration.N,5)  + "/" + String( g_sensor_state.gyro[1],5 ) + ", ";
+			imuLog += String(g_calibration.gyro_total[2]/g_calibration.N,5)  + "/" + String( g_sensor_state.gyro[2],5 );
+      break;
+  }
+  
+	imuLog += "\r\n"; // Add a new line
+	LOG_PORT.print( imuLog ); // Print log line to serial port
+}
 
 /*************************************************
 ** f_SendData
@@ -72,7 +111,7 @@ void f_SendData( int nBytesIn )
 		RequestByte = COMM_PORT.read(); 
 
 		/* Some Log outputs (usb) */
-		LOG_PORT.print("> Request code: ");
+		LOG_PORT.print("> Request Code (HEX): ");
 		LOG_PORT.println(RequestByte, HEX);
 
 		/* Respond the the request appropriately 
@@ -157,10 +196,29 @@ void f_SendData( int nBytesIn )
         Response.CheckSum       = f_CheckSum( &Response.Buffer[0], Response.Buffer_nBytes ); 
         f_SendPacket( Response );
         break;
-
+			
+			case 0x62:
+				/* DEBUG - Set Calibration Output
+				** Toggles calibration output mode
+				** Used to switch between gyro and accel
+				** calibration output 
+				** 0:Accel (min/ave/max) in text 
+				** 1:Gyro  (current/ave) in text */
+        LOG_PORT.print("\t> Recieved Calibration Output Toggle Request ... Case : ");
+        LOG_PORT.println(RequestByte, DEC);
+				g_calibration.output_mode = (g_calibration.output_mode+1)%2; 
         
+			case 0x63:
+				/* DEBUG - Reset Calibration Variables
+				** Resets all calibration states */
+        LOG_PORT.print("\t> Recieved Calibration Reset Request ... Case : ");
+        LOG_PORT.println(RequestByte, DEC);
+				Calibration_Init();
+				
 			default:
 				LOG_PORT.println("\t ERROR: I don't understand the request!");
+				LOG_PORT.print("\t Unidentified Request Code (DEC): ");
+				LOG_PORT.println(RequestByte, DEC);
 				break;
 		}
 		

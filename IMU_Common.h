@@ -2,6 +2,28 @@
 ** Tyedefs 
 ********************************************************************/
 
+#define FALSE 0
+#define TRUE 1
+
+/* 
+** TYPE: CAL_STATE_TYPE
+** This type is used to hold
+** data useful for calibration
+*/
+typedef struct
+{
+	int output_mode = 1;
+	
+	float accel_total[3] = {0.0f,0.0f,0.0f};
+	float accel_max[3] = {-9999.0f,-9999.0f,-9999.0f};
+	float accel_min[3] = {9999.0f,9999.0f,9999.0f};
+	
+	float gyro_total[3] = {0.0f,0.0f,0.0f};
+	float gyro_max[3] = {-9999.0f,-9999.0f,-9999.0f};
+	float gyro_min[3] = {9999.0f,9999.0f,9999.0f};
+	
+	int N;
+} CAL_STATE_TYPE;
 
 /*
 ** TYPE: DCM_STATE_TYPE
@@ -24,6 +46,8 @@ typedef struct
   float pitch;
   float roll;
   float mag[3];
+	
+	/* Accel x:Fore y:Port z:Zenith */
   float accel[3];
   float gyro[3];
 } SENSOR_STATE_TYPE;
@@ -39,12 +63,12 @@ typedef struct
   float G_Dt;
 
   /* Serial communication globals */
-  //static bool g_BaudLock; /* Used to set baud rate */
   bool g_BaudLock; /* Used to set baud rate */
   
   /* LED state globals */
   bool      g_LedState; /* Used to set LED state */
   uint32_t  g_LastBlinkTime;   /* Used to set LED state */
+	
 } CONTROL_STATE_TYPE;
 
 
