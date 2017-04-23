@@ -13,6 +13,7 @@
 */
 void SWE_Init ( void )
 {
+	int i;
   /* Initialize poincare event */
 	g_swe_state.HeelStrikeEvent = FALSE;
 
@@ -25,11 +26,34 @@ void SWE_Init ( void )
 	/* Initialize Pitch delta */
 	g_swe_state.PitchDelta = 0;
 	
-	/* Initialize SWE Acceleration state vector */
-	//g_swe_state.accel[] = {0.0f,0.0f,0.0f};
-	
-	/* Initialize SWE Velocity state vector */
-	//g_swe_state.vel[] = {0.0f,0.0f,0.0f};
+	for( i=0;i<3;i++ )
+	{
+		/* Initialize SWE Acceleration state vector */
+		g_swe_state.accel_total[i] = 0.0f;
+		
+		/* Initialize SWE Velocity state vector */
+		g_swe_state.vel[i] = 0.0f;
+		g_swe_state.vel_init[i] = 0.0f;
+		
+		g_swe_state.vel_delta[i] = 0.0f;
+		g_swe_state.vel_delta_total[i] = 0.0f;
+	}
+	g_swe_state.N = 1.0f;
+}
+
+/* 
+** Function: SWE_Reset
+** This function resets the SWE  
+** state variables. In particular,
+** the integrated variables.
+*/
+void SWE_Reset ( void )
+{
+	int i;
+	for( i=0; i<=2; i++)	
+	{
+		g_swe_state.vel[i] = 0.0f;
+	}
 }
 
 /* 
@@ -40,7 +64,7 @@ void SWE_Init ( void )
 void SWE_Update ( void )
 {
 	Map_Accel_2D();
-	Integrate_accel_2D();
+	Integrate_Accel_2D();
 }
 
 /*
@@ -53,24 +77,33 @@ void SWE_Update ( void )
 */
 void Map_Accel_2D ( void )
 {
-
 	/* Accel x:Fore y:Port z:Zenith */
-	g_swe_state.accel[0] = -g_sensor_state.accel[0]*sin(g_sensor_state.pitch) + g_sensor_state.accel[1]*cos(g_sensor_state.pitch);
-	g_swe_state.accel[1] = g_sensor_state.accel[0]*cos(g_sensor_state.pitch) + g_sensor_state.accel[1]*sin(g_sensor_state.pitch);
+	g_swe_state.N++;
+	
+	/* Calc Ax wrt world coordinate system */
+	g_swe_state.accel_total[0] += g_swe_state.accel[0];
+	g_swe_state.accel[0] = -g_sensor_state.accel[0]*sin(g_sensor_state.pitch) + g_sensor_state.accel[1]*cos(g_sensor_state.pitch) - (g_swe_state.accel_total[0]/g_swe_state.N);
+	
+	/* Calc Ay wrt world coordinate system */
+	g_swe_state.accel_total[1] += g_swe_state.accel[1];
+	g_swe_state.accel[1] = g_sensor_state.accel[0]*cos(g_sensor_state.pitch) + g_sensor_state.accel[1]*sin(g_sensor_state.pitch) - GRAVITY - g_swe_state.accel_total[1]/g_swe_state.N;
 }
 
 /* 
-** Function: Integrate_accel_2D
+** Function: Integrate_Accel_2D
 ** Integrate acceleration (wrt leg ref coordinates)
 ** to get velocity (wrt leg ref coordinates) 
 ** Assumes 2D motion
 */
-void Integrate_accel_2D ( void )
+void Integrate_Accel_2D ( void )
 {
 	int i;
 	for( i=0; i<=2; i++)	
 	{
-		g_swe_state.vel[i] = g_swe_state.vel[i] + g_swe_state.accel[i]*g_control_state.G_Dt + g_swe_state.vel_init[i];
+		g_swe_state.vel_delta[i] = g_swe_state.vel[i];
+		g_swe_state.vel[i] = g_swe_state.vel[i] + g_swe_state.accel[i]*g_control_state.G_Dt + g_swe_state.vel_init[i] - (g_swe_state.vel_delta_total[i]/g_swe_state.N);
+		g_swe_state.vel_delta[i] = g_swe_state.vel[i] - g_swe_state.vel_delta[i];
+		g_swe_state.vel_delta_total[i] += g_swe_state.vel_delta[i];
 	}
 }
 

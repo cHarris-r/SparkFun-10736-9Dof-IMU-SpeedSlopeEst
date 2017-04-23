@@ -2,6 +2,12 @@
 ** Types for SWE code
 ********************************************************************/
 
+#define SWE_GAIN_AP 0.1f
+#define SWE_GAIN_AI 0.00005f
+#define SWE_GAIN_VP 0.01f
+#define SWE_GAIN_VI 0.000005f
+
+
 /*
 ** TYPE: SWE_STATE_TYPE
 ** This holds all the state variables
@@ -28,6 +34,7 @@ typedef struct
 	** Leg acceleration vector
 	** wrt leg coordinate reference frame */
 	float accel[3];
+	float accel_total[3];
 	
 	/* [v_x, v_y, v_Z]
 	** Leg velocity vector
@@ -37,4 +44,8 @@ typedef struct
 	/* Initial velocity for each gait */
 	float vel_init[3];
 	
+	float vel_delta[3];
+	float vel_delta_total[3];
+	
+	float N;
 } SWE_STATE_TYPE;

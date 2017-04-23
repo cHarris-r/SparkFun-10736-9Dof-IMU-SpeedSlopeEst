@@ -61,7 +61,7 @@ void loop()
   Read_Sensors();
 	
 	/* Apply Freq Filter to Input */
-	FIR_Filter();
+	//FIR_Filter();
 	IIR_Filter();
 	DSP_Shift();
 
@@ -75,7 +75,7 @@ void loop()
 	SWE_Update();
 
 	/* Read/Respond to command */
-	if( Serial.available() > 0 ) { f_SendData(Serial.available());  }
+	if( Serial.available() > 0 ) { f_SendData( Serial.available() );  }
 
   /* Blink LED 
   ** TO DO: It would be nice to have a blink code

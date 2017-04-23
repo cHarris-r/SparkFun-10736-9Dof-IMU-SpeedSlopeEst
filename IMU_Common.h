@@ -12,17 +12,17 @@
 */
 typedef struct
 {
-	int output_mode = 1;
+	int output_mode = 0;
 	
-	float accel_total[3] = {0.0f,0.0f,0.0f};
-	float accel_max[3] = {-9999.0f,-9999.0f,-9999.0f};
-	float accel_min[3] = {9999.0f,9999.0f,9999.0f};
+	float accel_total[3];
+	float accel_max[3];
+	float accel_min[3];
 	
-	float gyro_total[3] = {0.0f,0.0f,0.0f};
-	float gyro_max[3] = {-9999.0f,-9999.0f,-9999.0f};
-	float gyro_min[3] = {9999.0f,9999.0f,9999.0f};
+	float gyro_total[3];
+	float gyro_max[3];
+	float gyro_min[3];
 	
-	int N;
+	float N;
 } CAL_STATE_TYPE;
 
 /*
@@ -58,6 +58,10 @@ typedef struct
 ** variables. */
 typedef struct
 {
+	int calibrate_flag = 0;
+	
+	int output_mode = 0;
+	
   unsigned long timestamp;
   unsigned long timestamp_old;
   float G_Dt;

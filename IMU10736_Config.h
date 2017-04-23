@@ -7,7 +7,7 @@
 ******************************************************************/
 
 #define DEBUG 1 
-#define CALIBRATE 1
+#define CALIBRATE 0
 
 /* Communication Parameters
 *******************************************************************/
@@ -32,6 +32,24 @@
 /* "1G reference" used for DCM filter and accelerometer calibration */
 #define GRAVITY 256.0f 
 
+/*
+** NOTES on orientation for the 10736 IMU
+**   Terms: 
+**     Fore:       (Front) Edge oposite of the power port
+**     Aft:        (Rear) Edge of the power port
+**     Starboard:  (Right) Edge with reset switch
+**     Port:       (Left) Edge oposite of reset switch
+**     Zenith:     (Up) Clean face of board 
+**     Nadir:      (Down) Populated face of board
+**   Contrary to the silk, the axis are positioned as follows:
+**     +x is Fore,       -x is Aft
+**     +y is Starboard,  -y is Port
+**     +z is Zenith,     -z is Nadir
+**   This means, placing the board on a flat surface with the 
+**   unpopulated side (Zenith) down will result in an acceleration 
+**   of about -256 (1xg) for accel[2] (z) since the acceleration  
+**   from gravity with be acting along -z.
+*/
 
 /* Define pitch orientation convention
 ** Range: -90:90
@@ -39,7 +57,7 @@
 ** PITCH_O:1 - Pitch orientation #1. Angle x-axis w/ Horizontal Plane  +Rot:Aft-Down    0:Nadir0/Zenith down. +90:Aft down   -90:Fore down
 ** PITCH_O:2 - Pitch orientation #2. Angle y-axis w/ Horizontal Plane  +Rot:Port-Down   0:Fore/Aft down       +90:Port down  -90:Starboard down
 ** PITCH_O:3 - Pitch orientation #3. Angle z-axis w/ Horizontal Plane  +Rot:Nadir-Down  0:Fore/Aft down       +90:Nadir down -90:Zenith down */
-#define PITCH_O  1
+#define PITCH_O  2
 
 /* Pitch rotation convention
 ** This sets the sign of rotation for pitch
@@ -200,12 +218,12 @@
 
 /* Accelerometer Calibration
 ******************************************************************/
-#define ACCEL_X_MIN ((float) -250)
-#define ACCEL_X_MAX ((float) 250)
-#define ACCEL_Y_MIN ((float) -250)
-#define ACCEL_Y_MAX ((float) 250)
-#define ACCEL_Z_MIN ((float) -250)
-#define ACCEL_Z_MAX ((float) 250)
+#define ACCEL_X_MIN ((float) -250) /*((float) -258.376) /*((float) -250)*/
+#define ACCEL_X_MAX ((float) 250) /*((float) -252.166) /*((float) 250)*/
+#define ACCEL_Y_MIN ((float) -250) /*((float) -258.6)   /*((float) -250)*/
+#define ACCEL_Y_MAX ((float) 250) /*((float) 253.913)  /*((float) 250)*/
+#define ACCEL_Z_MIN ((float) -250) /*((float) -266.768) /*((float) -250)*/
+#define ACCEL_Z_MAX ((float) 250) /*((float) 229.600)  /*((float) 250)*/
 #define ACCEL_X_OFFSET ((ACCEL_X_MIN + ACCEL_X_MAX) / 2.0f)
 #define ACCEL_Y_OFFSET ((ACCEL_Y_MIN + ACCEL_Y_MAX) / 2.0f)
 #define ACCEL_Z_OFFSET ((ACCEL_Z_MIN + ACCEL_Z_MAX) / 2.0f)
@@ -235,9 +253,9 @@
 ******************************************************************/
 // Gain for gyroscope (ITG-3200)
 #define GYRO_GAIN 0.06957 // Same gain on all axes
-#define GYRO_AVERAGE_OFFSET_X ((float) 0.0)
-#define GYRO_AVERAGE_OFFSET_Y ((float) 0.0)
-#define GYRO_AVERAGE_OFFSET_Z ((float) 0.0)
+#define GYRO_AVERAGE_OFFSET_X ((float) -300.0) /*((float) 0.0)*/
+#define GYRO_AVERAGE_OFFSET_Y ((float) -150.0) /*((float) 0.0)*/
+#define GYRO_AVERAGE_OFFSET_Z ((float) -50.0)  /*((float) 0.0)*/
 #define GYRO_SCALED_RAD(x) (x * TO_RAD(GYRO_GAIN)) 
 #define GYRO_X_SCALED(x) ((x-GYRO_AVERAGE_OFFSET_X) * TO_RAD(GYRO_GAIN)) 
 #define GYRO_Y_SCALED(x) ((x-GYRO_AVERAGE_OFFSET_Y) * TO_RAD(GYRO_GAIN)) 

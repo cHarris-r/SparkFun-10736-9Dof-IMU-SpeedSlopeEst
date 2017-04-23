@@ -22,21 +22,29 @@ void Debug_LogOut(void)
 	
 	String imuLog = ""; // Create a fresh line to log
 	
-  imuLog += "Time: " + String( g_control_state.timestamp ) + ", "; // Add time to log string
-  imuLog += "DT: " + String( g_control_state.G_Dt,5 ) + ", ";
-	imuLog += "SR: " + String( (1/g_control_state.G_Dt),5 ) + ", "; // Add delta time to log string
-
-  imuLog += "Roll 1:" + String( TO_DEG( g_sensor_state.roll ),5 ) + ", ";
-  imuLog += "Pitch:" + String( TO_DEG( g_sensor_state.pitch ),5 ) + ", ";
+  //imuLog += "T:" + String( g_control_state.timestamp ) + ", "; // Add time to log string
+  //imuLog += "DT:" + String( g_control_state.G_Dt,3 ) + ", ";
+	//imuLog += "SR:" + String( (1/g_control_state.G_Dt),3 ) + ", "; // Add delta time to log string
+	
+  //imuLog += "R:" + String( TO_DEG( g_sensor_state.roll ),3 ) + ", ";
+  //imuLog += "P:" + String( TO_DEG( g_sensor_state.pitch ),3 ) + ", ";
 	//imuLog += "Yaw:" + String( TO_DEG( g_sensor_state.yaw ),5 ) + ", ";
   
-  imuLog += "accel:" + String( g_sensor_state.accel[0],5 ) + ", " + String( g_sensor_state.accel[1],5 ) + ", " + String( g_sensor_state.accel[2],5 ) + ", ";
-  imuLog += "gyro:" + String( g_sensor_state.gyro[0],5 ) + ", " + String( g_sensor_state.gyro[1],5 ) + ", " + String( g_sensor_state.gyro[2],5 ) + ", ";
- 
-	//g_swe_state.accel
-	//imuLog += "swe_accel:" + String( g_swe_state.accel[0],5 ) + ", " + String(g_swe_state.accel[1],5 ) + ", ";
-	//imuLog += "swe_vel:" + String( g_swe_state.vel[0],5 ) + ", " + String(g_swe_state.vel[1],5 ) + ", ";
-	
+  switch ( g_control_state.output_mode )
+	{
+		case 0:
+			imuLog += "accel:" + String( g_sensor_state.accel[0],3 ) + "," + String( g_sensor_state.accel[1],3 ) + "," + String( g_sensor_state.accel[2],3 ) + " ";
+			imuLog += "gyro:" + String( g_sensor_state.gyro[0],3 ) + "," + String( g_sensor_state.gyro[1],3 ) + "," + String( g_sensor_state.gyro[2],3 ) + " ";
+			break;
+		case 1:
+			//imuLog += "swe_a(c/ave):";
+			//imuLog += String( g_swe_state.accel[0],3 ) + "/" + String( g_swe_state.accel_total[0]/g_swe_state.N ,3 ) + ",";
+			//imuLog += String( g_swe_state.accel[1],3 ) + "/" + String( g_swe_state.accel_total[1]/g_swe_state.N ,3 ) + " ";
+			//imuLog += "swe_v (v/d/da):";
+			imuLog += String( g_swe_state.vel[0],3 ) + "/" + String( g_swe_state.vel_delta[0],3 ) + "/" + String( g_swe_state.vel_delta_total[0]/g_swe_state.N,3 ) + ",";
+			imuLog += String( g_swe_state.vel[1],3 ) + "/" + String( g_swe_state.vel_delta[1],3 ) + "/" + String( g_swe_state.vel_delta_total[1]/g_swe_state.N,3 );
+			break;
+	}
 	imuLog += "\r\n"; // Add a new line
 	LOG_PORT.print( imuLog ); // Print log line to serial port
 }
@@ -54,23 +62,23 @@ void Cal_LogOut(void)
   
 	String imuLog = ""; // Create a fresh line to log
 	
-  imuLog += "Time: " + String( g_control_state.timestamp ) + ", "; // Add time to log string
-  imuLog += "DT: " + String( g_control_state.G_Dt,5 ) + ", ";
-	imuLog += "SR: " + String( (1/g_control_state.G_Dt) ) + ", "; // Add delta time to log string
+  imuLog += "Time:" + String( g_control_state.timestamp ) + ", "; // Add time to log string
+  imuLog += "DT:" + String( g_control_state.G_Dt,3 ) + ", ";
+	imuLog += "SR:" + String( (1/g_control_state.G_Dt) ) + ", "; // Add delta time to log string
 
   switch ( g_calibration.output_mode )
   {
-    case 1:
+    case 0:
     	imuLog += "accel (min/ave/max): ";
-			imuLog += String(g_calibration.accel_min[0],5) + "/" + String(g_calibration.accel_total[0]/g_calibration.N,5) + "/" + String(g_calibration.accel_max[0],5) + ", ";
-			imuLog += String(g_calibration.accel_min[1],5) + "/" + String(g_calibration.accel_total[1]/g_calibration.N,5) + "/" + String(g_calibration.accel_max[1],5) + ", ";
-			imuLog += String(g_calibration.accel_min[2],5) + "/" + String(g_calibration.accel_total[2]/g_calibration.N,5) + "/" + String(g_calibration.accel_max[2],5) + ", ";
+			imuLog += String(g_calibration.accel_min[0],3) + "/" + String(g_calibration.accel_total[0]/g_calibration.N,3) + "/" + String(g_calibration.accel_max[0],3) + ", ";
+			imuLog += String(g_calibration.accel_min[1],3) + "/" + String(g_calibration.accel_total[1]/g_calibration.N,3) + "/" + String(g_calibration.accel_max[1],3) + ", ";
+			imuLog += String(g_calibration.accel_min[2],3) + "/" + String(g_calibration.accel_total[2]/g_calibration.N,3) + "/" + String(g_calibration.accel_max[2],3);
       break; 
-    case 2:
-      imuLog += "gyro (current/ave): ";
-			imuLog += String(g_calibration.gyro_total[0]/g_calibration.N,5)  + "/" + String( g_sensor_state.gyro[0],5 ) + ", ";
-			imuLog += String(g_calibration.gyro_total[1]/g_calibration.N,5)  + "/" + String( g_sensor_state.gyro[1],5 ) + ", ";
-			imuLog += String(g_calibration.gyro_total[2]/g_calibration.N,5)  + "/" + String( g_sensor_state.gyro[2],5 );
+    case 1:
+      imuLog += "gyro (ave/current): ";
+			imuLog += String(g_calibration.gyro_total[0]/g_calibration.N,3)  + "/" + String( g_sensor_state.gyro[0],3 ) + ", ";
+			imuLog += String(g_calibration.gyro_total[1]/g_calibration.N,3)  + "/" + String( g_sensor_state.gyro[1],3 ) + ", ";
+			imuLog += String(g_calibration.gyro_total[2]/g_calibration.N,3)  + "/" + String( g_sensor_state.gyro[2],3 );
       break;
   }
   
@@ -204,9 +212,11 @@ void f_SendData( int nBytesIn )
 				** calibration output 
 				** 0:Accel (min/ave/max) in text 
 				** 1:Gyro  (current/ave) in text */
-        LOG_PORT.print("\t> Recieved Calibration Output Toggle Request ... Case : ");
+        LOG_PORT.print("\t> Recieved Output Toggle Request ... Case : ");
         LOG_PORT.println(RequestByte, DEC);
-				g_calibration.output_mode = (g_calibration.output_mode+1)%2; 
+				if( CALIBRATE ) { g_calibration.output_mode = (g_calibration.output_mode+1)%2; }
+				else { g_control_state.output_mode = (g_control_state.output_mode+1)%2; }
+				break;
         
 			case 0x63:
 				/* DEBUG - Reset Calibration Variables
@@ -214,6 +224,15 @@ void f_SendData( int nBytesIn )
         LOG_PORT.print("\t> Recieved Calibration Reset Request ... Case : ");
         LOG_PORT.println(RequestByte, DEC);
 				Calibration_Init();
+				break;
+			
+			case 0x64:
+				/* SWE - Reset SWE state variables
+				** Simulate heel strike */
+        LOG_PORT.print("\t> Recieved SWE Reset Request ... Case : ");
+        LOG_PORT.println(RequestByte, DEC);
+				SWE_Reset();
+				break;
 				
 			default:
 				LOG_PORT.println("\t ERROR: I don't understand the request!");
