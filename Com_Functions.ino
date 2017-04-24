@@ -19,30 +19,32 @@
 void Debug_LogOut(void)
 {
 	/* Output Euler angles as strings to LOG_PORT */
-	
 	String imuLog = ""; // Create a fresh line to log
-	
   //imuLog += "T:" + String( g_control_state.timestamp ) + ", "; // Add time to log string
   //imuLog += "DT:" + String( g_control_state.G_Dt,3 ) + ", ";
 	//imuLog += "SR:" + String( (1/g_control_state.G_Dt),3 ) + ", "; // Add delta time to log string
-	
-  //imuLog += "R:" + String( TO_DEG( g_sensor_state.roll ),3 ) + ", ";
-  //imuLog += "P:" + String( TO_DEG( g_sensor_state.pitch ),3 ) + ", ";
-	//imuLog += "Yaw:" + String( TO_DEG( g_sensor_state.yaw ),5 ) + ", ";
   
   switch ( g_control_state.output_mode )
 	{
 		case 0:
+			imuLog += "\t";
+			imuLog += "R:" + String( TO_DEG( g_sensor_state.roll ),3 ) + ", ";
+			imuLog += "P:" + String( TO_DEG( g_sensor_state.pitch ),3 ) + ", ";
+			//imuLog += "Yaw:" + String( TO_DEG( g_sensor_state.yaw ),5 ) + ", ";
 			imuLog += "accel:" + String( g_sensor_state.accel[0],3 ) + "," + String( g_sensor_state.accel[1],3 ) + "," + String( g_sensor_state.accel[2],3 ) + " ";
 			imuLog += "gyro:" + String( g_sensor_state.gyro[0],3 ) + "," + String( g_sensor_state.gyro[1],3 ) + "," + String( g_sensor_state.gyro[2],3 ) + " ";
 			break;
 		case 1:
-			//imuLog += "swe_a(c/ave):";
-			//imuLog += String( g_swe_state.accel[0],3 ) + "/" + String( g_swe_state.accel_total[0]/g_swe_state.N ,3 ) + ",";
-			//imuLog += String( g_swe_state.accel[1],3 ) + "/" + String( g_swe_state.accel_total[1]/g_swe_state.N ,3 ) + " ";
-			//imuLog += "swe_v (v/d/da):";
-			imuLog += String( g_swe_state.vel[0],3 ) + "/" + String( g_swe_state.vel_delta[0],3 ) + "/" + String( g_swe_state.vel_delta_total[0]/g_swe_state.N,3 ) + ",";
-			imuLog += String( g_swe_state.vel[1],3 ) + "/" + String( g_swe_state.vel_delta[1],3 ) + "/" + String( g_swe_state.vel_delta_total[1]/g_swe_state.N,3 );
+			imuLog += "\t";
+			imuLog += "swe_v (v/d/op/oi):";
+			imuLog += String( g_swe_state.vel[0],3 ) + "/" + String( g_swe_state.vel_delta[0],3 ) + "/" + String( g_swe_state.omega_vp[0],3 ) + "/" + String( g_swe_state.omega_vi[0],5 ) + " , ";
+			imuLog += String( g_swe_state.vel[1],3 ) + "/" + String( g_swe_state.vel_delta[1],3 ) + "/" + String( g_swe_state.omega_vp[1],3 ) + "/" + String( g_swe_state.omega_vi[1],5 );
+			break;
+		case 2:
+			imuLog += "\t";
+			imuLog += "swe_a (a/d/op/oi):";
+			imuLog += String( g_swe_state.accel[0],3 ) + "/" + String( g_swe_state.accel_delta[0],3 ) + "/" + String( g_swe_state.omega_ap[0],3 ) + "/" + String( g_swe_state.omega_ai[0],5 ) + " , ";
+			imuLog += String( g_swe_state.accel[1],3 ) + "/" + String( g_swe_state.accel_delta[1],3 ) + "/" + String( g_swe_state.omega_ap[1],3 ) + "/" + String( g_swe_state.omega_ai[1],5 );
 			break;
 	}
 	imuLog += "\r\n"; // Add a new line
@@ -215,7 +217,7 @@ void f_SendData( int nBytesIn )
         LOG_PORT.print("\t> Recieved Output Toggle Request ... Case : ");
         LOG_PORT.println(RequestByte, DEC);
 				if( CALIBRATE ) { g_calibration.output_mode = (g_calibration.output_mode+1)%2; }
-				else { g_control_state.output_mode = (g_control_state.output_mode+1)%2; }
+				else { g_control_state.output_mode = (g_control_state.output_mode+1)%3; }
 				break;
         
 			case 0x63:

@@ -57,7 +57,7 @@ void Blink_LED( void )
     //LOG_PORT.println("> # Available on COMM_PORT: " + String(COMM_PORT.available()) );
 		
 		/* Toggle LED */
-    LOG_PORT.println("> Blink ...");
+    //LOG_PORT.println("> Blink ...");
     digitalWrite(HW_LED_PIN, g_control_state.g_LedState);
     g_control_state.g_LedState = !g_control_state.g_LedState;
     g_control_state.g_LastBlinkTime = millis();

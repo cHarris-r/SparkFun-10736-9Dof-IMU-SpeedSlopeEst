@@ -2,10 +2,11 @@
 ** Types for SWE code
 ********************************************************************/
 
-#define SWE_GAIN_AP 0.1f
+#define SWE_GAIN_AP 0.01f
 #define SWE_GAIN_AI 0.00005f
-#define SWE_GAIN_VP 0.01f
-#define SWE_GAIN_VI 0.000005f
+
+#define SWE_GAIN_VP 0.25f
+#define SWE_GAIN_VI 0.025f
 
 
 /*
@@ -15,20 +16,9 @@
 */
 typedef struct
 {
-	/* TRUE at heel strike only
-	** used for poincare mapping */
-  bool HeelStrikeEvent;
-	
-	/* Swing State:   0
-	** Planted State: 1 */
-	bool LegStanceState; 
-	
-	/* Pitch Memory to get Pitch Delta */
-	float PitchMem[2];
-	
-	/* Positive pitch delta: Upswing (Swing-Leg)
-	** Negative pitch delta: Downswing (Planted-Leg) */
-	float PitchDelta;
+	float pitch_mem;
+	float pitch_delta;
+	float pitch_delta_total;
 	
 	/* [a_x, a_y, a_z]
 	** Leg acceleration vector
@@ -36,16 +26,19 @@ typedef struct
 	float accel[3];
 	float accel_total[3];
 	
+	float accel_delta[3];
+	float omega_ap[3];
+	float omega_ai[3];
+	
 	/* [v_x, v_y, v_Z]
 	** Leg velocity vector
 	** wrt leg coordinate reference frame */
 	float vel[3];
-	
-	/* Initial velocity for each gait */
-	float vel_init[3];
+	float vel_total[3];
 	
 	float vel_delta[3];
-	float vel_delta_total[3];
+	float omega_vp[3];
+	float omega_vi[3];
 	
 	float N;
 } SWE_STATE_TYPE;
