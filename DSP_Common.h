@@ -12,7 +12,7 @@
 ********************************************************************/
 
 /* Define the number of taps in filter */
-#define NTAPS 5
+#define NTAPS 3
 
 /* FIR Filter coeffs
 ** All FIR filters have a cutoff of 0.1*nyq 

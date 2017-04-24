@@ -6,6 +6,7 @@
 ** which are not defined in the standard libraries.
 **************************************************/
 
+#define SIGN(x) ( (0<x) - (x<0) )
 
 /*************************************************
 ** Vector_Dot_Product

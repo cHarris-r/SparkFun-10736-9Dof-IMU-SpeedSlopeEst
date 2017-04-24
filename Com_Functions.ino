@@ -208,7 +208,7 @@ void f_SendData( int nBytesIn )
         break;
 			
 			case 0x62:
-				/* DEBUG - Set Calibration Output
+				/* DEBUG - Toggle Output
 				** Toggles calibration output mode
 				** Used to switch between gyro and accel
 				** calibration output 

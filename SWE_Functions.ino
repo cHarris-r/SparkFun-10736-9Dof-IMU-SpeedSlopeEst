@@ -15,7 +15,7 @@ void SWE_Init ( void )
 {
 	int i;
 
-	g_swe_state.pitch_mem   = 0.0f;
+	g_swe_state.pitch_mem   = g_sensor_state.pitch;
 	g_swe_state.pitch_delta = 0.0f;
 	g_swe_state.pitch_delta_total = 0.0f;
 	
@@ -66,7 +66,10 @@ void SWE_Update ( void )
 	Integrate_Accel_2D();
 	Estimate_Error();
 	
-	
+	if( SIGN(g_sensor_state.pitch)*SIGN(g_swe_state.pitch_mem) < 0 )
+	{
+		SWE_Init();
+	}
 	
 	g_swe_state.pitch_mem = g_sensor_state.pitch;
 }
@@ -162,8 +165,9 @@ void Estimate_Error ( void )
 	/* Method 1 
 	** Estimate error from relationship to pitch delta 
 	** m1_pho: Strength of relationship */
-	m1_pho = 0.1f;
-	m1_ave_pitch_delta = abs(g_swe_state.pitch_delta_total/g_swe_state.N);
+	m1_pho = 0.01f;
+	//m1_ave_pitch_delta = abs(g_swe_state.pitch_delta_total/g_swe_state.N);
+	m1_ave_pitch_delta = abs(g_swe_state.pitch_delta);
 	//pe1 = m1_ave_pitch_delta;
 	pe1 = exp(-m1_ave_pitch_delta/m1_pho);
 	
