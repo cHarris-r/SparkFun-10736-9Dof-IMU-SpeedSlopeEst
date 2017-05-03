@@ -58,7 +58,7 @@ void Blink_LED( void )
 		
 		/* Toggle LED */
     //LOG_PORT.println("> Blink ...");
-    digitalWrite(HW_LED_PIN, g_control_state.g_LedState);
+    //digitalWrite(HW_LED_PIN, g_control_state.g_LedState);
     g_control_state.g_LedState = !g_control_state.g_LedState;
     g_control_state.g_LastBlinkTime = millis();
   }

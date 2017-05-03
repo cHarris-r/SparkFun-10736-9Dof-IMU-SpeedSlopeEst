@@ -27,7 +27,7 @@ void Debug_LogOut(void)
   switch ( g_control_state.output_mode )
 	{
 		case 0:
-			imuLog += "\t";
+			//imuLog += "\t";
 			imuLog += "R:" + String( TO_DEG( g_sensor_state.roll ),3 ) + ", ";
 			imuLog += "P:" + String( TO_DEG( g_sensor_state.pitch ),3 ) + ", ";
 			//imuLog += "Yaw:" + String( TO_DEG( g_sensor_state.yaw ),5 ) + ", ";
@@ -35,17 +35,36 @@ void Debug_LogOut(void)
 			imuLog += "gyro:" + String( g_sensor_state.gyro[0],3 ) + "," + String( g_sensor_state.gyro[1],3 ) + "," + String( g_sensor_state.gyro[2],3 ) + " ";
 			break;
 		case 1:
-			imuLog += "\t";
-			imuLog += "swe_v (v/d/op/oi):";
-			imuLog += String( g_swe_state.vel[0],3 ) + "/" + String( g_swe_state.vel_delta[0],3 ) + "/" + String( g_swe_state.omega_vp[0],3 ) + "/" + String( g_swe_state.omega_vi[0],5 ) + " , ";
-			imuLog += String( g_swe_state.vel[1],3 ) + "/" + String( g_swe_state.vel_delta[1],3 ) + "/" + String( g_swe_state.omega_vp[1],3 ) + "/" + String( g_swe_state.omega_vi[1],5 );
+			//imuLog += "\t";
+			imuLog += "swe_v (v/av/d/od/op):";
+			imuLog += String( g_swe_state.vel[0],3 ) + "/" + String( g_swe_state.vel_ave[0],3 ) + "/";
+			imuLog += String( g_swe_state.vel_delta[0],3 ) + "/" + String( g_swe_state.omega_vd[0],3 ) + "/";
+			imuLog += String( g_swe_state.omega_vp[0],5 ) + " , ";
+			imuLog += String( g_swe_state.vel[1],3 ) + "/" + String( g_swe_state.vel_ave[0],3 ) + "/";
+			imuLog += String( g_swe_state.vel_delta[1],3 ) + "/" + String( g_swe_state.omega_vd[1],3 ) + "/";
+			imuLog += String( g_swe_state.omega_vp[1],5 );
 			break;
 		case 2:
-			imuLog += "\t";
-			imuLog += "swe_a (a/d/op/oi):";
-			imuLog += String( g_swe_state.accel[0],3 ) + "/" + String( g_swe_state.accel_delta[0],3 ) + "/" + String( g_swe_state.omega_ap[0],3 ) + "/" + String( g_swe_state.omega_ai[0],5 ) + " , ";
-			imuLog += String( g_swe_state.accel[1],3 ) + "/" + String( g_swe_state.accel_delta[1],3 ) + "/" + String( g_swe_state.omega_ap[1],3 ) + "/" + String( g_swe_state.omega_ai[1],5 );
+			//imuLog += "\t";
+			imuLog += "swe_a (a/aa/d/od/op):";
+			imuLog += String( g_swe_state.accel[0],3 ) + "/" + String( g_swe_state.accel_ave[0],3 ) + "/" + String( g_swe_state.accel_delta[0],3 ) + "/" + String( g_swe_state.omega_ad[0],3 ) + "/" + String( g_swe_state.omega_ap[0],5 ) + " , ";
+			imuLog += String( g_swe_state.accel[1],3 ) + "/" + String( g_swe_state.accel_ave[1],3 ) + "/" + String( g_swe_state.accel_delta[1],3 ) + "/" + String( g_swe_state.omega_ad[1],3 ) + "/" + String( g_swe_state.omega_ap[1],5 );
 			break;
+		case 3:
+			imuLog += String( g_control_state.timestamp ) + ",";
+			imuLog += String( g_sensor_state.accel[0],0 ) + "," + String( g_sensor_state.accel[1],0 ) + "," + String( g_sensor_state.accel[2],0 ) + ",";
+			imuLog += String( g_sensor_state.gyro[0],0 ) + "," + String( g_sensor_state.gyro[1],0 ) + "," + String( g_sensor_state.gyro[2],0 ) + ",";
+			imuLog += String( TO_DEG(g_sensor_state.yaw), 2 ) + "," + String( TO_DEG(g_sensor_state.pitch), 2 ) + "," + String( TO_DEG(g_sensor_state.roll), 2 ) + ",";
+			//imuLog += String( g_swe_state.accel[0],3 ) + "," + String( g_swe_state.accel[1],3 ) + ",";
+			imuLog += String( g_swe_state.accel_ave[0],3 ) + "," + String( g_swe_state.accel_ave[1],3 ) + ",";
+			//imuLog += String( g_swe_state.vel[0],3 ) + "," + String( g_swe_state.vel[1],3 )  + ",";
+			imuLog += String( g_swe_state.vel_ave[0],3 ) + "," + String( g_swe_state.vel_ave[1],3 );
+			break;
+		case 4:
+			imuLog += "\t";
+			imuLog = "err est (p1/p2/p3/pave): ";
+			imuLog += String( g_swe_state.pe[0],7 ) + "/" + String( g_swe_state.pe[1],7 ) + "/" + String( g_swe_state.pe[2],7 ) + "/";
+			imuLog += String( g_swe_state.pave,7 ); 
 	}
 	imuLog += "\r\n"; // Add a new line
 	LOG_PORT.print( imuLog ); // Print log line to serial port
@@ -216,8 +235,8 @@ void f_SendData( int nBytesIn )
 				** 1:Gyro  (current/ave) in text */
         LOG_PORT.print("\t> Recieved Output Toggle Request ... Case : ");
         LOG_PORT.println(RequestByte, DEC);
-				if( CALIBRATE ) { g_calibration.output_mode = (g_calibration.output_mode+1)%2; }
-				else { g_control_state.output_mode = (g_control_state.output_mode+1)%3; }
+				if( CALIBRATE ) { g_calibration.output_mode = (g_calibration.output_mode+1)%NUM_CALCOM_MODES; }
+				else { g_control_state.output_mode = (g_control_state.output_mode+1)%NUM_COM_MODES; }
 				break;
         
 			case 0x63:

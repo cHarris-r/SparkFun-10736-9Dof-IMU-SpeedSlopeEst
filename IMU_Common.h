@@ -5,6 +5,9 @@
 #define FALSE 0
 #define TRUE 1
 
+#define NUM_CALCOM_MODES 2
+#define NUM_COM_MODES 5
+
 /* 
 ** TYPE: CAL_STATE_TYPE
 ** This type is used to hold
@@ -45,7 +48,8 @@ typedef struct
   float yaw;
   float pitch;
   float roll;
-  float mag[3];
+	
+  float mag[3]; /* not used */
 	
 	/* Accel x:Fore y:Port z:Zenith */
   float accel[3];
@@ -60,7 +64,7 @@ typedef struct
 {
 	int calibrate_flag = 0;
 	
-	int output_mode = 0;
+	int output_mode = 3;
 	
   unsigned long timestamp;
   unsigned long timestamp_old;

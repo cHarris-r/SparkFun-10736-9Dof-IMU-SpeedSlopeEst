@@ -62,8 +62,8 @@ void loop()
 	
 	/* Apply Freq Filter to Input */
 	//FIR_Filter();
-	IIR_Filter();
-	DSP_Shift();
+	//IIR_Filter();
+	//DSP_Shift();
 
   if( CALIBRATE ) { Calibrate(); }
   

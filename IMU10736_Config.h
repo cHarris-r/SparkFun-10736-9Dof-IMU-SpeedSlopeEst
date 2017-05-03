@@ -16,7 +16,8 @@
 #define COMM_PORT_BAUD 9600
 
 /* The LED can be used for external debugging */
-#define UART_BLINK_RATE 100
+//#define UART_BLINK_RATE 100
+#define UART_BLINK_RATE 0
 
 
 
@@ -24,8 +25,11 @@
 *******************************************************************/
 
 /* DCM gain */
-#define Kp_ROLLPITCH 0.1f //0.02f
-#define Ki_ROLLPITCH 0.00005f //0.00002f
+#define Kp_ROLLPITCH 0.3f
+//#define Kp_ROLLPITCH 0.02f
+#define Ki_ROLLPITCH 0.00005f
+//#define Ki_ROLLPITCH 0.00002f
+
 #define Kp_YAW 1.2f
 #define Ki_YAW 0.00002f
 
@@ -78,9 +82,9 @@
 
 /* Roll rotation reference direction
 ** This will reverse the direction of the "0" reference for roll
-**   1 :"0" is in direction of +axis
-**  -1 :"0" is in direction of -axis */
-#define ROLL_ZREF 1
+**   1 :"0" is in direction of +axis (Fore)
+**  -1 :"0" is in direction of -axis (Aft) */
+#define ROLL_ZREF -1
 
 
 

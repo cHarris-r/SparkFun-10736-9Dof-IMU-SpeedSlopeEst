@@ -15,6 +15,8 @@ void SWE_Init ( void )
 {
 	int i;
 
+	g_swe_state.N = 1.0f;
+	
 	g_swe_state.pitch_mem   = g_sensor_state.pitch;
 	g_swe_state.pitch_delta = 0.0f;
 	g_swe_state.pitch_delta_total = 0.0f;
@@ -22,18 +24,19 @@ void SWE_Init ( void )
 	for( i=0;i<3;i++ )
 	{
 		/* Initialize SWE Acceleration state vector */
+		g_swe_state.accel_ave[i] = g_swe_state.accel_total[i]/g_swe_state.N;
 		g_swe_state.accel[i] = 0.0f;
 		g_swe_state.accel_total[i] = 0.0f;
 		
 		/* Initialize SWE Velocity state vector */
+		g_swe_state.vel_ave[i] = g_swe_state.vel_total[i]/g_swe_state.N;
 		g_swe_state.vel[i] = 0.0f;
 		g_swe_state.vel_total[i] = 0.0f;
 		
 		g_swe_state.vel_delta[i] = 0.0f;
+		g_swe_state.omega_vd[i]  = 0.0f;
 		g_swe_state.omega_vp[i]  = 0.0f;
-		g_swe_state.omega_vi[i]  = 0.0f;
 	}
-	g_swe_state.N = 1.0f;
 }
 
 /* 
@@ -91,24 +94,26 @@ void Map_Accel_2D ( void )
 	
 	/* Calc Ax wrt world coordinate system */
 	g_swe_state.accel[0]   = -g_sensor_state.accel[0]*sin(g_sensor_state.pitch) + g_sensor_state.accel[1]*cos(g_sensor_state.pitch);
-	g_swe_state.accel[0]  -= (g_swe_state.omega_ap[0] + g_swe_state.omega_ai[0]);
+	g_swe_state.accel[0]  -= (g_swe_state.omega_ad[0] + g_swe_state.omega_ap[0]);
 		
 	g_swe_state.accel_delta[0] = g_swe_state.accel[0] - g_swe_state.accel_delta[0];
-	g_swe_state.omega_ap[0]    = g_swe_state.accel_delta[0]*SWE_GAIN_AP;
-	g_swe_state.omega_ai[0]   += g_swe_state.accel_delta[0]*SWE_GAIN_AI;
+	g_swe_state.omega_ad[0]    = g_swe_state.accel_delta[0]*SWE_GAIN_AD;
+	g_swe_state.omega_ap[0]    = g_swe_state.accel[0]*SWE_GAIN_AP;
 	
 	g_swe_state.accel_total[0] += g_swe_state.accel[0];
+  g_swe_state.accel_ave[0]  = g_swe_state.accel_total[0]/g_swe_state.N;
 	
 	
 	/* Calc Ay wrt world coordinate system */
 	g_swe_state.accel[1]  = g_sensor_state.accel[0]*cos(g_sensor_state.pitch) + g_sensor_state.accel[1]*sin(g_sensor_state.pitch) - GRAVITY;
-	g_swe_state.accel[1] -= g_swe_state.omega_ap[1] - g_swe_state.omega_ai[1];
+	g_swe_state.accel[1] -= g_swe_state.omega_ad[1] - g_swe_state.omega_ap[1];
 	
 	g_swe_state.accel_delta[1] = g_swe_state.accel[1] - g_swe_state.accel_delta[1];
-	g_swe_state.omega_ap[1]    = g_swe_state.accel_delta[1]*SWE_GAIN_AP;
-	g_swe_state.omega_ai[1]   += g_swe_state.accel_delta[1]*SWE_GAIN_AI;
+	g_swe_state.omega_ad[1]    = g_swe_state.accel_delta[1]*SWE_GAIN_AD;
+	g_swe_state.omega_ap[1]    = g_swe_state.accel[1]*SWE_GAIN_AP;
 	
 	g_swe_state.accel_total[1] += g_swe_state.accel[1];
+  g_swe_state.accel_ave[1]  = g_swe_state.accel_total[1]/g_swe_state.N;
 }
 
 /* 
@@ -125,13 +130,14 @@ void Integrate_Accel_2D ( void )
 		g_swe_state.vel_delta[i] = g_swe_state.vel[i];
 		
 		g_swe_state.vel[i]  = g_swe_state.vel[i] + g_swe_state.accel[i]*g_control_state.G_Dt;
-		g_swe_state.vel[i] -= (g_swe_state.omega_vp[i] + g_swe_state.omega_vi[i]);
+		g_swe_state.vel[i] -= (g_swe_state.omega_vd[i] + g_swe_state.omega_vp[i]);
 		
 		g_swe_state.vel_delta[i] = g_swe_state.vel[i] - g_swe_state.vel_delta[i];
-		g_swe_state.omega_vp[i]  = g_swe_state.vel_delta[i]*SWE_GAIN_VP;
-		g_swe_state.omega_vi[i] += g_swe_state.vel_delta[i]*SWE_GAIN_VI;
+		g_swe_state.omega_vd[i]  = g_swe_state.vel_delta[i]*SWE_GAIN_VD;
+		g_swe_state.omega_vp[i]  = g_swe_state.vel[i]*SWE_GAIN_VP;
 		
 		g_swe_state.vel_total[i] += g_swe_state.vel[i];
+		g_swe_state.vel_ave[i]  = g_swe_state.vel_total[i]/g_swe_state.N;
 	}
 }
 
@@ -168,15 +174,16 @@ void Estimate_Error ( void )
 	m1_pho = 0.01f;
 	//m1_ave_pitch_delta = abs(g_swe_state.pitch_delta_total/g_swe_state.N);
 	m1_ave_pitch_delta = abs(g_swe_state.pitch_delta);
-	//pe1 = m1_ave_pitch_delta;
-	pe1 = exp(-m1_ave_pitch_delta/m1_pho);
+	//g_swe_state.pe[0] = m1_ave_pitch_delta;
+	g_swe_state.pe[0] = exp(-m1_ave_pitch_delta/m1_pho);
 	
 	/* Method 2:
 	** Estimate error based on velocity feedback values */
 	m2_ave_feedback = 0.0f;
-	for( i=0;i<2;i++ ) { m2_ave_feedback += abs(g_swe_state.omega_vi[i]/g_swe_state.vel[i]); }
-	//pe2 = m2_ave_feedback;
-	pe2 = min( abs(m2_ave_feedback/2), 1);
+	for( i=0;i<1;i++ ) { m2_ave_feedback += (g_swe_state.omega_vd[i]/g_swe_state.vel[i]); }
+	//for( i=0;i<2;i++ ) { m2_ave_feedback += abs(g_swe_state.omega_vd[i]/g_swe_state.vel[i]); }
+	g_swe_state.pe[1] = m2_ave_feedback;
+	//g_swe_state.pe[1] = min( abs(m2_ave_feedback/2), 1);
 	
 	/* Method 3:
 	** Estimate error based on the difference between
@@ -187,20 +194,21 @@ void Estimate_Error ( void )
 		m3_ave_vel = (g_swe_state.vel_total[i]/g_swe_state.N);
 		m3_delta += abs((m3_ave_vel - g_swe_state.vel[i])/m3_ave_vel);
 	}
-	//pe3 = m3_delta;
-	pe3 = min(m3_delta/2,1);
+	//g_swe_state.pe[2] = m3_delta;
+	g_swe_state.pe[2] = min(m3_delta/2,1);
 	
 	/* Get final error estimate
 	** Final estimate can be the avereage p */
-	pave = (pe1 + pe2 + pe3)/3;
+	g_swe_state.pave = (g_swe_state.pe[0] + g_swe_state.pe[1] + g_swe_state.pe[2])/3;
 	
+	/* 
 	if ( millis() > (g_control_state.g_LastBlinkTime + UART_BLINK_RATE) )
   {
 		imuLog = "\t\t err est (p1/p2/p3/pave): ";
 		imuLog += String( pe1,7 ) + "/" + String( pe2,7 ) + "/" + String( pe3,7 ) + "/" +String( pave,7 );
 		imuLog += "\r\n\n"; 
 		LOG_PORT.print( imuLog );
-	}
+	} */
 }
 
 
